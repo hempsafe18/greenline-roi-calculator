@@ -25,7 +25,6 @@ function App() {
   const [sampled, setSampled] = useState(50);
   const [conv, setConv] = useState(50);
   const [price, setPrice] = useState(16);
-  const [upa, setUpa] = useState(25);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const reportRef = useRef(null);
 
@@ -33,9 +32,10 @@ function App() {
     const sprintCost = getSprintCost(acts);
     const costPerAct = getCostPerActivation(acts);
     const convRate = conv / 100;
+    const upa = Math.round(sampled * convRate);
     const totalSampled = acts * sampled;
     const totalBuyers = Math.round(totalSampled * convRate);
-    const totalUnits = Math.round(acts * upa * convRate);
+    const totalUnits = acts * upa;
     const totalRev = totalUnits * price;
     const netRev = totalRev - sprintCost;
     const cpc = sprintCost / totalSampled;
@@ -44,7 +44,7 @@ function App() {
     const beUnits = Math.ceil(sprintCost / price);
 
     // Calculate ramp data
-    const revenuePerAct = upa * convRate * price;
+    const revenuePerAct = upa * price;
     let cumRev = 0;
     let beAct = null;
     const rampData = Array.from({ length: acts }, (_, i) => {
@@ -71,10 +71,11 @@ function App() {
       roiPct,
       beUnits,
       rampData,
+      upa,
       beAct,
       convRate
     };
-  }, [acts, sampled, conv, price, upa]);
+  }, [acts, sampled, conv, price]);
 
   const data = calculate();
 
@@ -204,18 +205,15 @@ function App() {
               displayValue={fmt(price)}
               testId="price-slider"
             />
-            <SliderRow
-              label="Avg units purchased per activation"
-              value={upa}
-              min={5}
-              max={50}
-              step={5}
-              onChange={setUpa}
-              displayValue={upa}
-              testId="units-slider"
-            />
           </div>
         </section>
+
+        {/* Derived Metric: Avg units purchased per activation */}
+        <div className="derived-metric-card" data-testid="derived-metric-upa">
+          <span className="derived-metric-label">Avg units purchased per activation</span>
+          <span className="derived-metric-formula">{sampled} consumers × {conv}% conversion</span>
+          <span className="derived-metric-value">{fmtN(data.upa)}</span>
+        </div>
 
         {/* Metrics Grid */}
         <section className="metrics-grid" data-testid="metrics-section">
