@@ -35,7 +35,7 @@ function App() {
     const convRate = conv / 100;
     const totalSampled = acts * sampled;
     const totalBuyers = Math.round(totalSampled * convRate);
-    const totalUnits = acts * upa;
+    const totalUnits = Math.round(acts * upa * convRate);
     const totalRev = totalUnits * price;
     const netRev = totalRev - sprintCost;
     const cpc = sprintCost / totalSampled;
@@ -44,7 +44,7 @@ function App() {
     const beUnits = Math.ceil(sprintCost / price);
 
     // Calculate ramp data
-    const revenuePerAct = upa * price;
+    const revenuePerAct = upa * convRate * price;
     let cumRev = 0;
     let beAct = null;
     const rampData = Array.from({ length: acts }, (_, i) => {
