@@ -3,16 +3,18 @@ import "@/App.css";
 import { Leaf, TrendingUp, Users, DollarSign, Target, CheckCircle, XCircle, Download, Loader2 } from "lucide-react";
 import html2pdf from 'html2pdf.js';
 
-const COST_PER_ACTIVATION_BASE = 225;
-const COST_PER_ACTIVATION_VOLUME = 216; // At 30 activations
-
-const getSprintCost = (activations) => {
-  const costPerAct = activations >= 30 ? COST_PER_ACTIVATION_VOLUME : COST_PER_ACTIVATION_BASE;
-  return activations * costPerAct;
-};
+const COST_PER_ACTIVATION_SPRINT1 = 200; // 12–29 activations
+const COST_PER_ACTIVATION_SPRINT2 = 190; // 30–59 activations
+const COST_PER_ACTIVATION_SPRINT3 = 180; // 60+ activations
 
 const getCostPerActivation = (activations) => {
-  return activations >= 30 ? COST_PER_ACTIVATION_VOLUME : COST_PER_ACTIVATION_BASE;
+  if (activations >= 60) return COST_PER_ACTIVATION_SPRINT3;
+  if (activations >= 30) return COST_PER_ACTIVATION_SPRINT2;
+  return COST_PER_ACTIVATION_SPRINT1;
+};
+
+const getSprintCost = (activations) => {
+  return activations * getCostPerActivation(activations);
 };
 
 const fmt = (n) => '$' + Math.round(n).toLocaleString();
@@ -20,10 +22,10 @@ const fmtN = (n) => Math.round(n).toLocaleString();
 
 function App() {
   const [acts, setActs] = useState(20);
-  const [sampled, setSampled] = useState(30);
-  const [conv, setConv] = useState(80);
-  const [price, setPrice] = useState(12);
-  const [upb, setUpb] = useState(2);
+  const [sampled, setSampled] = useState(50);
+  const [conv, setConv] = useState(50);
+  const [price, setPrice] = useState(16);
+  const [upa, setUpa] = useState(25);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const reportRef = useRef(null);
 
@@ -33,7 +35,7 @@ function App() {
     const convRate = conv / 100;
     const totalSampled = acts * sampled;
     const totalBuyers = Math.round(totalSampled * convRate);
-    const totalUnits = totalBuyers * upb;
+    const totalUnits = acts * upa;
     const totalRev = totalUnits * price;
     const netRev = totalRev - sprintCost;
     const cpc = sprintCost / totalSampled;
@@ -42,7 +44,7 @@ function App() {
     const beUnits = Math.ceil(sprintCost / price);
 
     // Calculate ramp data
-    const revenuePerAct = sampled * convRate * upb * price;
+    const revenuePerAct = upa * price;
     let cumRev = 0;
     let beAct = null;
     const rampData = Array.from({ length: acts }, (_, i) => {
@@ -72,7 +74,7 @@ function App() {
       beAct,
       convRate
     };
-  }, [acts, sampled, conv, price, upb]);
+  }, [acts, sampled, conv, price, upa]);
 
   const data = calculate();
 
@@ -156,7 +158,7 @@ function App() {
           </div>
 
           <div className="fixed-cost-badge" data-testid="sprint-cost-badge">
-            <span>Sprint cost ({acts} activations / 30 days)</span>
+            <span>Sprint cost ({acts} activations / 30 days · {acts >= 60 ? 'Sprint 3' : acts >= 30 ? 'Sprint 2' : 'Sprint 1'} pricing)</span>
             <strong>{fmt(data.sprintCost)}</strong>
             <span className="cost-per-act">{fmt(data.costPerAct)}/activation</span>
           </div>
@@ -165,9 +167,9 @@ function App() {
             <SliderRow
               label="Number of activations"
               value={acts}
-              min={10}
-              max={30}
-              step={2}
+              min={12}
+              max={72}
+              step={6}
               onChange={setActs}
               displayValue={acts}
               testId="activations-slider"
@@ -203,13 +205,13 @@ function App() {
               testId="price-slider"
             />
             <SliderRow
-              label="Avg units purchased per buyer"
-              value={upb}
-              min={1}
-              max={4}
-              step={1}
-              onChange={setUpb}
-              displayValue={upb}
+              label="Avg units purchased per activation"
+              value={upa}
+              min={5}
+              max={50}
+              step={5}
+              onChange={setUpa}
+              displayValue={upa}
               testId="units-slider"
             />
           </div>
@@ -336,7 +338,7 @@ function App() {
         {/* Comparison Table */}
         <section className="card comparison-card" data-testid="comparison-section">
           <div className="section-header">
-            <span className="section-tag">Why $225/activation is the smartest spend in the room</span>
+            <span className="section-tag">Why Greenline is the smartest activation spend in the room</span>
           </div>
 
           <div className="table-wrapper">
@@ -353,7 +355,7 @@ function App() {
               <tbody>
                 <tr>
                   <td>Price per activation</td>
-                  <td className="greenline-col">$225</td>
+                  <td className="greenline-col">$180–$200</td>
                   <td>$150–180</td>
                   <td>$100–150</td>
                   <td>$300+ <span className="varies">(loaded)</span></td>
@@ -394,7 +396,7 @@ function App() {
                   <td><XCircle className="cross" size={18} /></td>
                 </tr>
                 <tr>
-                  <td>Named Florida clients</td>
+                  <td>Named clients</td>
                   <td className="greenline-col">3CHI, Señorita</td>
                   <td>None listed</td>
                   <td>None</td>
@@ -427,7 +429,7 @@ function App() {
         <footer className="footer" data-testid="footer">
           <div className="footer-content">
             <Leaf size={16} />
-            <span>Greenline Activations · greenlineactivations.com · Prepared for Plift · March 2026</span>
+            <span>Greenline Activations · greenlineactivations.com</span>
           </div>
         </footer>
       </main>
