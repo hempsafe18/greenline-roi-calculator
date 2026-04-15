@@ -23,7 +23,7 @@ const fmtN = (n) => Math.round(n).toLocaleString();
 function App() {
   const [acts, setActs] = useState(20);
   const [sampled, setSampled] = useState(50);
-  const [conv, setConv] = useState(50);
+  const [conv, setConv] = useState(30);
   const [price, setPrice] = useState(16);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const reportRef = useRef(null);
@@ -188,8 +188,8 @@ function App() {
             <SliderRow
               label="Sample-to-purchase conversion"
               value={conv}
-              min={40}
-              max={90}
+              min={20}
+              max={100}
               step={5}
               onChange={setConv}
               displayValue={`${conv}%`}
